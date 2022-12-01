@@ -8,7 +8,11 @@ import numpy as np
 
 base_func = lambda stufe, speed=1: speed * 24. * ( 1/3. + 1/750.*stufe + 1/5.*stufe**2 + 1/1250.*stufe**3 )
 
-linear_split_func = lambda stufe, speed=1:  speed * 4/5.* (1/125. * stufe + 2. )* {0:0,1:2.,2:3. ,3:3.,4:2.}[stufe%5]
+linear_split_func = lambda stufe, speed=1:  speed * 4/5.* (1/125. * stufe + 2. )* {0: 0.,
+                                                                                   1: 2.,
+                                                                                   2: 3. ,
+                                                                                   3: 3.,
+                                                                                   4: 2.}[stufe%5]
 ### {0:0,1:2.,2:3. ,3:3.,4:2.}[stufe%5] ist identisch mit z.B. [0,2,3][min(5-stufe%5,stufe%5)]
 
 ### Die Werte für die 25-Oszillationen
@@ -24,11 +28,11 @@ osc_initial_slope = {1:-11.,
                      4:  4.,
                      0: -5}
 
-osc_slope_diff = {1:  2,
+osc_slope_diff = {0:  0,
+                  1:  2,
                   2: -1,
                   3:  1,
-                  4: -2,
-                  0:  0}
+                  4: -2}
 
 osc_slope_func = lambda stufe: osc_initial_slope[stufe%5] + (stufe%25-stufe%5) * osc_slope_diff[stufe%5] 
 

@@ -11,9 +11,8 @@ import matplotlib.pyplot as plt
 import matplotlib as mpl 
 import datetime
 import os
-from gw_feprod import iron_function, iron_diff_function
-from gw_feprod import base_func, linear_split_func, osc_func
-
+from ../gw_resprod import fe_function, fe_6x_function
+#from gw_resprod import base_func, linear_split_func, osc_func
 
 PNG_FOLDER = "plots/"
 RUNDE = "Gigrawars"
@@ -74,8 +73,8 @@ def plot_eisenproduktion(save_fig=False, speed_factor=1):
         print("Keine Vergleichswerte für die gewünschte Geschwindigkeit gefunden. Keine weitere Ausgabe.")
         return
 
-    fe_values_absolut = [(stf, iron_function(stf,speed_factor) )  for stf,_ in fe_angaben]
-    fe_values_diff = [(s, iron_diff_function(s, v, speed=speed_factor))  for s,v in fe_angaben]
+    fe_values_absolut = [(stf, fe_function(stf) )  for stf,_ in fe_angaben]
+    fe_values_diff = [(s, v-fe_function(s))  for s,v in fe_angaben]
 
     fig1 ,(ax_abs,ax_diff) = plt.subplots(2, figsize=[8.0,5.0])
     
@@ -146,7 +145,7 @@ def plot_eisenproduktion(save_fig=False, speed_factor=1):
     
     print("Stufe","Ingame-Wert", "Funktion".rjust(13), "Differenz".rjust(10))
     for s,v in fe_angaben[:20]+fe_angaben[-20:]:
-        print(f"{s:3d}  {v:12.0f}  {iron_function(s,speed_factor):12.2f}  {iron_diff_function(s,v,speed_factor): .2e}" )
+        print(f"{s:3d}  {v:12.0f}  {fe_function(s):12.2f}  {v-fe_function(s): .2e}" )
         
 if __name__ == '__main__':
     for speed in [1,6]:
