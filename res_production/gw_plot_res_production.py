@@ -13,6 +13,7 @@ import datetime
 import os
 import gw_resprod as gw_res
 
+
 PNG_FOLDER = "plots/"
 RUNDE = "Gigrawars"
 UNI = {1:"Uni4",

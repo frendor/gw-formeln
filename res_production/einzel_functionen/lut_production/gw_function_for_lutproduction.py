@@ -18,6 +18,7 @@ from copy import copy
 import datetime
 import os
 import operator
+import math
 
 PNG_FOLDER = "plots/"
 
@@ -56,6 +57,8 @@ mpl.rcParams['ytick.direction'] = 'in'
 
 # from https://stackoverflow.com/questions/3154460/python-human-readable-large-numbers
 millnames = ['',' Tausend',' Mio.',' Mrd.',' Bio.']
+
+lw_round = lambda x: int(x + math.copysign(0.5, x))
 
 with open("ingame-werte/gw_uni4_lutvalues","r") as prodinfo:
     info_file = prodinfo.read()
@@ -106,14 +109,14 @@ linear_split_func = lambda stufe, speed=1 : speed * ( 1. + stufe/250.) * {0:  5,
                                                                           3:  8,
                                                                           4:  7}[stufe%5]
                                                       
-ground_func = lambda stufe,speed=1: np.round( speed*( 3*( stufe**2 + stufe**3/250) + (1. + stufe/250.) * [5,7,8,8,7][stufe%5]))
+ground_func = lambda stufe,speed=1: lw_round(np.round(speed*( 3*( stufe**2 + stufe**3/250) + (1. + stufe/250.) * [5,7,8,8,7][stufe%5]),decimals=6))
 
 
 lut_function = lambda stufe, speed=1: np.round(base_func(stufe,speed) + linear_split_func(stufe,speed) + osc_func(stufe,speed), decimals=6)
 lut_diff_function = lambda stufe, value,speed=1: value - np.round(base_func(stufe,speed) + linear_split_func(stufe,speed) + osc_func(stufe,speed), decimals=6)
 
-#lut_function = lambda stufe, speed=1: ground_func(stufe,speed)
-#lut_diff_function = lambda stufe, value,speed=1: value - ground_func(stufe,speed)
+lut_function = lambda stufe, speed=1: ground_func(stufe,speed)
+lut_diff_function = lambda stufe, value,speed=1: value - ground_func(stufe,speed)
 
 
 #lut_values = [(stufe,lut_function(stufe)) for stufe in range(1,1000)]

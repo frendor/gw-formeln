@@ -5,6 +5,9 @@
 """
 
 import numpy as np
+import math 
+
+old_round = lambda x: int(x + math.copysign(0.5, x))
 
 res_factor={"H2O":2.,
             "Fe": 8/5.,
@@ -23,7 +26,8 @@ linear_split_func = lambda stufe: (1. + stufe/250.) * {0: 5.,
                                                        4: 7.}[stufe%5]
 
 ### Fe, Lut, H2O und H2 (Chemie) folgen einer Formel:
-res_function = lambda stufe, speed, res_type, use_osc=True: np.round(speed * res_factor[res_type] * (base_func(stufe) + linear_split_func(stufe)) + use_osc* osc_func(stufe, res_type, speed), decimals=6*use_osc)
+res_function = lambda stufe, speed, res_type, use_osc=True: np.round(speed * res_factor[res_type] * (base_func(stufe) + linear_split_func(stufe)) + use_osc* osc_func(stufe, res_type, speed), decimals=6) if use_osc else\
+                                                            old_round(np.round(speed * res_factor[res_type] * (base_func(stufe) + linear_split_func(stufe)) , decimals=6)) 
 
 #Standarduniversum:
 fe_function = lambda stufe, use_osc = True: res_function(stufe, speed=1, res_type="Fe", use_osc=use_osc)
@@ -62,6 +66,7 @@ h2_echem_6x_function = lambda stufe, use_osc=True: np.round( res_factor["H2EC"] 
 
 ### 25-Teilige Oszillation, Wirkung einer Rundungsfunktion
 ### Manchmal reicht einfach eine normale Rundungsfunktion, bei Lut z.B. braucht man die Oszillationsfunktion 
+### Die alte Rundungsfunktion(0.5 wird immer aufgerundet zu 1) repariert das.
 osc_slope_func = lambda stufe, res_type: osc_initial_slope_dict[res_type][stufe%5] + (stufe%25-stufe%5) * osc_slope_diff_dict[res_type][stufe%5] 
 
 osc_func = lambda stufe, res_type, speed=1:  osc_jump( speed/50. * ( 1/5. * osc_initial_values_dict[res_type][stufe%25]\
