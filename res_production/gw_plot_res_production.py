@@ -4,7 +4,6 @@
 @author: frendor
 """
 
-import numpy as np
 import locale
 locale.setlocale( locale.LC_ALL, 'de_DE.UTF-8' )
 import matplotlib.pyplot as plt
@@ -89,18 +88,16 @@ def plot_produktion(save_fig=False, speed_factor=1):
     ax_diff.plot([],[], " ", label ="Differenz")
     for res_type, res_values_absolut in angaben_dict.items():
         
-        ax_abs.plot(*zip(*res_values_absolut), ".", label=f"{res_type} Ingame-Werte" )
-        ax_abs.plot(*zip(*[(s,res_functions[speed_factor][res_type](s)) for s, v in res_values_absolut]), "-", label=f"{res_type} Funktion" )
+        ax_abs.plot(*zip(*res_values_absolut), "-", label=f"{res_type} Ingame-Werte" )
+        ax_abs.plot(*zip(*[(s,res_functions[speed_factor][res_type](s)) for s, v in res_values_absolut]), "--", label=f"{res_type} Funktion" )
     
-        ax_diff.plot(*zip(*[(s,v-res_functions[speed_factor][res_type](s)) for s, v in res_values_absolut]),"-", label=f"{res_type} Funktion + Oszillation")    
-        ax_diff.plot(*zip(*[(s,v-res_functions[speed_factor][res_type](s,use_osc=False)) for s, v in res_values_absolut]),".-", label=f"{res_type} Funktion gerundet")    
+        ax_diff.plot(*zip(*[(s,v-res_functions[speed_factor][res_type](s)) for s, v in res_values_absolut]),"-", label=f"{res_type} Funktion ")    
         
-        
-    
     ax_abs.legend(bbox_to_anchor=(1,1), loc="upper left")
     ax_abs.set_xlabel("Minenstufe")
     ax_abs.set_ylabel("Produktionswert")
     ax_abs.set_yscale("log")
+    ax_diff.set_title("Differenz Funktion vs Ingame-Wert")
     ax_diff.legend(bbox_to_anchor=(1,1), loc="upper left")
     
     
@@ -108,57 +105,42 @@ def plot_produktion(save_fig=False, speed_factor=1):
     
     plt.tight_layout()
     if save_fig:
-        plt.savefig(f"{PNG_FOLDER}{RUNDE}_{UNI[speed_factor]}_absolute_Eisenproduktion+Funktion.png")
+        plt.savefig(f"{PNG_FOLDER}{RUNDE}_{UNI[speed_factor]}_absolute_Resproduktion+Funktionen.png")
    
     plt.show()
-    
 
-    #### Zeigen wir mal die Teile der Funktion:
-    fig2, (ax_base, ax_split, ax_osci) = plt.subplots(3, figsize=[10.0,8.0])
-
-    max_lvl = 999
-
-    ax_base.set_title("Bestandteile der Formel für die Gigrawars-Eisenproduktion")
-    ax_base.plot(*zip(*[(stf,gw_res.base_func(stf)) for stf in range(max_lvl)]), label="Basisfunktion")
-    ax_base.legend(bbox_to_anchor=(1,1), loc="upper left")
-    
-    
-    ax_split.plot([], [], " ", label="Lineare Verschiebungen")
-    for branch in [0,1,2]:
-        ax_split.plot(*zip(*[(stf,gw_res.linear_split_func(stf)) for stf in range(max_lvl) if stf%5 == branch]),label=f"Stufe%5 == {branch} und {5-branch}" if branch > 0 else f"Stufe%5 == {branch}")
-    ax_split.legend(bbox_to_anchor=(1,1), loc="upper left")
-    
-    ax_osci.plot(*zip(*[(stf,gw_res.osc_func(stf,"Fe",speed_factor)) for stf in range(max_lvl)]),label="25-Teilige Oszillation\nals Rundungsfunktion")
-    ax_osci.legend(bbox_to_anchor=(1,1), loc="upper left")
-    
-    fig2.text(0.65,0.06,"{} {}".format("fReN",datetime.datetime.now().date()),size=9)
-    plt.tight_layout()
-    if save_fig:
-        plt.savefig(f"{PNG_FOLDER}{RUNDE}_{UNI[speed_factor]}_EisenProdFunktion_Einzelterme.png")
-
-    plt.show()
-    
-    ##### Die 25-Teilige Oszillation ####
-    
-    fig3, ax_25 = plt.subplots(5,5, figsize=[10.,10.], sharex = True, sharey=True )
-    ax_25[0,2].set_title("25-Teilige Oszillation (Rundungsfunktion)")
-    
-    for branch in range(25):
-        x_vals = np.arange(branch, 21*25,25)
-        x_vals = np.arange(branch, max_lvl,25)
-        ax_25[branch%5,int(branch/5)%5].plot(*zip(*[(s,gw_res.osc_func(s,"Fe",speed_factor)) for s in x_vals]),".-", label=f"Stufe%{branch}")
-    fig3.text(0.65,0.16,"{} {}".format("fReN",datetime.datetime.now().date()),size=9)
-
-    if save_fig:
-        plt.savefig(f"{PNG_FOLDER}{RUNDE}_{UNI[speed_factor]}_EisenProdFunktion_Oszillationen.png")
-
-    plt.show()
     ####
     
     print("Stufe","Ingame-Wert", "Funktion".rjust(13), "Differenz".rjust(10))
-    for s,v in angaben_dict["Fe"][:20]+angaben_dict["Fe"][-20:]:
-        print(f"{s:3d}  {v:12.0f}  {res_functions[speed_factor]['Fe'](s):12.2f}  {v-res_functions[speed_factor]['Fe'](s): .2e}" )
+    for s,v,v_f in [(s,v,res_functions[speed_factor]['Fe'](s)) for s,v in angaben_dict["Fe"] if (s < 20 or s > 980) or v-res_functions[speed_factor]['Fe'](s) ] :
+        print(f"{s:3d}  {v:12.0f}  {v_f:12.2f}  {v-v_f: .2e}" )
+
+    
+def plot_sub_functions(save_fig=False):
+    #### Zeigen wir mal die Teile der Funktion:
+    fig2, (ax_base, ax_split) = plt.subplots(2, figsize=[10.0,8.0])
+
+    max_lvl = 999
+
+    ax_base.set_title("Bestandteile der GW-Resformel (am Beispiel Eisen)")
+    ax_base.plot(*zip(*[(stf,gw_res.base_func(stf)) for stf in range(max_lvl)]), label="Quadratischer + \nkubischer Teil")
+    ax_base.legend(bbox_to_anchor=(1,1), loc="upper left")
+    
+    
+    ax_split.plot([], [], " ", label="Lineare Auftrennung")
+    for branch in [0,1,2]:
+        ax_split.plot(*zip(*[(stf,gw_res.linear_split_func(stf)) for stf in range(max_lvl) if stf%5 == branch]),label=f"Stufe%5 == {branch} und {5-branch}" if branch > 0 else f"Stufe%5 == {branch}")
+    ax_split.legend(bbox_to_anchor=(1,1), loc="upper left")
+        
+    fig2.text(0.65,0.06,"{} {}".format("fReN",datetime.datetime.now().date()),size=9)
+    plt.tight_layout()
+    if save_fig:
+        plt.savefig(f"{PNG_FOLDER}{RUNDE}_{UNI[1]}_Beispiel_EisenprodFunktion_Terme.png")
+
+    plt.show()
+    
         
 if __name__ == '__main__':
     for speed in [1,6]:
         plot_produktion(save_fig=True,speed_factor=speed)
+    plot_sub_functions(save_fig=True)

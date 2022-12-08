@@ -80,7 +80,7 @@ base_func_1x = lambda stufe: 5 * ( 125 + 10 * ( stufe**3 + {0: 5.,
 osc_func_echem = lambda stufe: 125* (-1)**stufe *{0:1, 1:-1 ,2:-1 ,3:1 ,4:1}[stufe%5]
 
 
-res_func_1x = lambda stufe: base_func_1x(stufe) + osc_func_echem(stufe)
+res_func_1x = lambda stufe: base_func_1x(stufe) + 0*osc_func_echem(stufe)
 
 
 ###### Im SpeedUniversum sah es anders aus:
@@ -188,11 +188,11 @@ def plot_resproduction(savefig=False, res_line = orig_values,
         fig1, (ax_absolut, ax_diff) = plt.subplots(2, figsize=[8.0,5.0], sharex=True)
     
         stufen_list, val_list = zip(*res_line)    
-        ax_absolut.plot(*zip(*res_line),label = f"{RES_ART} Produktion" )
+        ax_absolut.plot(*zip(*res_line[:100]),label = f"{RES_ART} Produktion" )
             
-        ax_absolut.plot(*zip(*[(s,res_function(s,speed_factor) ) for s,v in res_line]) , label=f"{RES_ART} Funktion" )
+        ax_absolut.plot(*zip(*[(s,res_function(s,speed_factor) ) for s,v in res_line[:100]]) , label=f"{RES_ART} Funktion" )
         
-        diff_line = [(s, res_diff_function(s,v,speed_factor)) for s,v in res_line]
+        diff_line = [(s, res_diff_function(s,v,speed_factor)) for s,v in res_line[:100]]
         ax_diff.plot (*zip(*diff_line), label = "Differenz" )
         
         ax_absolut.legend(bbox_to_anchor=(1,1), loc="upper left")
@@ -240,7 +240,7 @@ def plot_resproduction(savefig=False, res_line = orig_values,
             fit_func = lambda stufe, a=1,b=1: a + b *stufe
             ax.plot(stufen_list, val_list, ".-", label=f"{subline_nr%5} {subline_nr}")
             if speed_factor==1:
-                ax.plot(*zip(*[(s, osc_func_echem(s, speed_factor)) for s in stufen_list]), label="Osc EChem")
+                ax.plot(*zip(*[(s, osc_func_echem(s)) for s in stufen_list]), label="Osc EChem")
             
             params = res_fit(subline,fit_func,lin_fit_initial_params)
             ax.plot(*zip(*[(s,fit_func(s,*params)) for s in stufen_list] ), ".-", label=f"{subline_nr}")
@@ -375,13 +375,13 @@ def plot_resproduction(savefig=False, res_line = orig_values,
             
     
 if __name__ == '__main__':
-    for speed in [1,6]:
+    for speed in [6]:
         plot_resproduction(savefig=False,
                            show_absolut_fit_plots=False,
                            show_absolut_plots=True,
                            show_diff_plots=False,
-                           show_5split=False,
-                           show_25split=False,
+                           show_5split=True,
+                           show_25split=True,
                            show_osc_stepwidth = False,
                            show_micro_steps=False,
                            
